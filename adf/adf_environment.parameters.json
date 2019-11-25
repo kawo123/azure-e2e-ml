@@ -1,0 +1,24 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "baseName": {
+      "value": "e2eml"
+    },
+    "location": {
+      "value": "eastus"
+    },
+    "AzureDataLakeGen2_accountKey": {
+      "value": ""
+    },
+    "AzureSqlDatabaseServerless_connectionString": {
+      "value": ""
+    },
+    "AzureCosmosDBSQL_connectionString": {
+      "value": ""
+    },
+    "AzureDataLakeGen2_properties_typeProperties_url": {
+      "value": "https://e2emladlsg2.dfs.core.windows.net"
+    }
+  }
+}

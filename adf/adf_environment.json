@@ -1,0 +1,1209 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "baseName": {
+      "type": "string",
+      "maxLength": 10,
+      "minLength": 3,
+      "metadata": {
+        "description": "The base name to use as prefix to create Data Factory."
+      }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "eastus",
+      "allowedValues": [
+        "eastus",
+        "eastus2",
+        "southcentralus",
+        "southeastasia",
+        "westcentralus",
+        "westeurope",
+        "westus2",
+        "centralus"
+      ],
+      "metadata": {
+        "description": "Specifies the location for Data Factory."
+      }
+    },
+    "AzureDataLakeGen2_accountKey": {
+      "type": "secureString",
+      "metadata": "Secure string for 'accountKey' of 'AzureDataLakeGen2'"
+    },
+    "AzureSqlDatabaseServerless_connectionString": {
+      "type": "secureString",
+      "metadata": "Secure string for 'connectionString' of 'AzureSqlDatabaseServerless'"
+    },
+    "AzureCosmosDBSQL_connectionString": {
+      "type": "secureString",
+      "metadata": "Secure string for 'connectionString' of 'AzureCosmosDBSQL'"
+    },
+    "AzureDataLakeGen2_properties_typeProperties_url": {
+      "type": "string",
+      "defaultValue": "https://e2emladlsg2.dfs.core.windows.net"
+    }
+  },
+  "variables": {
+    "factoryName": "[concat(parameters('baseName'),'-adf')]",
+    "factoryId": "[concat('Microsoft.DataFactory/factories/', variables('factoryName'))]"
+  },
+  "resources": [
+    {
+      "name": "[concat(variables('factoryName'), '/PL_Copy_AzureSQL_To_ADLSG2')]",
+      "type": "Microsoft.DataFactory/factories/pipelines",
+      "apiVersion": "2018-06-01",
+      "properties": {
+        "activities": [
+          {
+            "name": "Act_Copy_AzureSQL_To_ADLSG2",
+            "type": "Copy",
+            "dependsOn": [],
+            "policy": {
+              "timeout": "7.00:00:00",
+              "retry": 0,
+              "retryIntervalInSeconds": 30,
+              "secureOutput": false,
+              "secureInput": false
+            },
+            "userProperties": [
+              {
+                "name": "Source",
+                "value": "dbo.Vendors"
+              },
+              {
+                "name": "Destination",
+                "value": "landing//vendors.csv"
+              }
+            ],
+            "typeProperties": {
+              "source": {
+                "type": "AzureSqlSource"
+              },
+              "sink": {
+                "type": "DelimitedTextSink",
+                "storeSettings": {
+                  "type": "AzureBlobFSWriteSettings"
+                },
+                "formatSettings": {
+                  "type": "DelimitedTextWriteSettings",
+                  "quoteAllText": true,
+                  "fileExtension": ".txt"
+                }
+              },
+              "enableStaging": false
+            },
+            "inputs": [
+              {
+                "referenceName": "DS_AzureSQL_Dbo_Vendors",
+                "type": "DatasetReference",
+                "parameters": {}
+              }
+            ],
+            "outputs": [
+              {
+                "referenceName": "DS_CSV_ADLSG2_Landing_Vendors",
+                "type": "DatasetReference",
+                "parameters": {}
+              }
+            ]
+          }
+        ],
+        "folder": {
+          "name": "Data Ingestion"
+        },
+        "annotations": []
+      },
+      "dependsOn": [
+        "[concat(variables('factoryId'), '/datasets/DS_AzureSQL_Dbo_Vendors')]",
+        "[concat(variables('factoryId'), '/datasets/DS_CSV_ADLSG2_Landing_Vendors')]"
+      ]
+    },
+    {
+      "name": "[concat(variables('factoryName'), '/PL_Copy_CosmosDB_To_ADLSG2')]",
+      "type": "Microsoft.DataFactory/factories/pipelines",
+      "apiVersion": "2018-06-01",
+      "properties": {
+        "activities": [
+          {
+            "name": "Act_Copy_CosmosDB_To_ADLSG2",
+            "type": "Copy",
+            "dependsOn": [],
+            "policy": {
+              "timeout": "7.00:00:00",
+              "retry": 0,
+              "retryIntervalInSeconds": 30,
+              "secureOutput": false,
+              "secureInput": false
+            },
+            "userProperties": [
+              {
+                "name": "Source",
+                "value": "MachineData"
+              },
+              {
+                "name": "Destination",
+                "value": "landing//machineData.csv"
+              }
+            ],
+            "typeProperties": {
+              "source": {
+                "type": "CosmosDbSqlApiSource",
+                "preferredRegions": []
+              },
+              "sink": {
+                "type": "DelimitedTextSink",
+                "storeSettings": {
+                  "type": "AzureBlobFSWriteSettings"
+                },
+                "formatSettings": {
+                  "type": "DelimitedTextWriteSettings",
+                  "quoteAllText": true,
+                  "fileExtension": ".txt"
+                }
+              },
+              "enableStaging": false,
+              "translator": {
+                "type": "TabularTranslator",
+                "mappings": [
+                  {
+                    "source": {
+                      "path": "$['ModelName']"
+                    },
+                    "sink": {
+                      "name": "ModelName",
+                      "type": "String"
+                    }
+                  },
+                  {
+                    "source": {
+                      "path": "$['MYCT']"
+                    },
+                    "sink": {
+                      "name": "MYCT",
+                      "type": "Int32"
+                    }
+                  },
+                  {
+                    "source": {
+                      "path": "$['MMIN']"
+                    },
+                    "sink": {
+                      "name": "MMIN",
+                      "type": "Int32"
+                    }
+                  },
+                  {
+                    "source": {
+                      "path": "$['MMAX']"
+                    },
+                    "sink": {
+                      "name": "MMAX",
+                      "type": "Int32"
+                    }
+                  },
+                  {
+                    "source": {
+                      "path": "$['CACH']"
+                    },
+                    "sink": {
+                      "name": "CACH",
+                      "type": "Int32"
+                    }
+                  },
+                  {
+                    "source": {
+                      "path": "$['CHMIN']"
+                    },
+                    "sink": {
+                      "name": "CHMIN",
+                      "type": "Int32"
+                    }
+                  },
+                  {
+                    "source": {
+                      "path": "$['CHMAX']"
+                    },
+                    "sink": {
+                      "name": "CHMAX",
+                      "type": "Int32"
+                    }
+                  },
+                  {
+                    "source": {
+                      "path": "$['PRP']"
+                    },
+                    "sink": {
+                      "name": "PRP",
+                      "type": "Int32"
+                    }
+                  },
+                  {
+                    "source": {
+                      "path": "$['ERP']"
+                    },
+                    "sink": {
+                      "name": "ERP",
+                      "type": "Int32"
+                    }
+                  },
+                  {
+                    "source": {
+                      "path": "$['VendorId']"
+                    },
+                    "sink": {
+                      "name": "VendorId",
+                      "type": "Int32"
+                    }
+                  }
+                ]
+              }
+            },
+            "inputs": [
+              {
+                "referenceName": "DS_CosmosDB_MachineData",
+                "type": "DatasetReference",
+                "parameters": {}
+              }
+            ],
+            "outputs": [
+              {
+                "referenceName": "DS_CSV_ADLSG2_Landing_MachineData",
+                "type": "DatasetReference",
+                "parameters": {}
+              }
+            ]
+          }
+        ],
+        "folder": {
+          "name": "Data Ingestion"
+        },
+        "annotations": []
+      },
+      "dependsOn": [
+        "[concat(variables('factoryId'), '/datasets/DS_CosmosDB_MachineData')]",
+        "[concat(variables('factoryId'), '/datasets/DS_CSV_ADLSG2_Landing_MachineData')]"
+      ]
+    },
+    {
+      "name": "[concat(variables('factoryName'), '/PL_Copy_ADLSG2_To_CosmosDB')]",
+      "type": "Microsoft.DataFactory/factories/pipelines",
+      "apiVersion": "2018-06-01",
+      "properties": {
+        "activities": [
+          {
+            "name": "Act_Copy_ADLSG2_To_CosmosDB",
+            "type": "Copy",
+            "dependsOn": [],
+            "policy": {
+              "timeout": "7.00:00:00",
+              "retry": 0,
+              "retryIntervalInSeconds": 30,
+              "secureOutput": false,
+              "secureInput": false
+            },
+            "userProperties": [
+              {
+                "name": "Source",
+                "value": "demo-prep//normalizedMachineData.csv"
+              },
+              {
+                "name": "Destination",
+                "value": "MachineData"
+              }
+            ],
+            "typeProperties": {
+              "source": {
+                "type": "DelimitedTextSource",
+                "storeSettings": {
+                  "type": "AzureBlobFSReadSettings",
+                  "recursive": false
+                },
+                "formatSettings": {
+                  "type": "DelimitedTextReadSettings",
+                  "skipLineCount": 0
+                }
+              },
+              "sink": {
+                "type": "CosmosDbSqlApiSink",
+                "writeBehavior": "upsert",
+                "disableMetricsCollection": false
+              },
+              "enableStaging": false,
+              "enableSkipIncompatibleRow": false,
+              "translator": {
+                "type": "TabularTranslator",
+                "mappings": [
+                  {
+                    "source": {
+                      "name": "ModelName",
+                      "type": "String"
+                    },
+                    "sink": {
+                      "path": "$['ModelName']"
+                    }
+                  },
+                  {
+                    "source": {
+                      "name": "MYCT",
+                      "type": "Int32"
+                    },
+                    "sink": {
+                      "path": "$['MYCT']"
+                    }
+                  },
+                  {
+                    "source": {
+                      "name": "MMIN",
+                      "type": "Int32"
+                    },
+                    "sink": {
+                      "path": "$['MMIN']"
+                    }
+                  },
+                  {
+                    "source": {
+                      "name": "MMAX",
+                      "type": "Int32"
+                    },
+                    "sink": {
+                      "path": "$['MMAX']"
+                    }
+                  },
+                  {
+                    "source": {
+                      "name": "CACH",
+                      "type": "Int32"
+                    },
+                    "sink": {
+                      "path": "$['CACH']"
+                    }
+                  },
+                  {
+                    "source": {
+                      "name": "CHMIN",
+                      "type": "Int32"
+                    },
+                    "sink": {
+                      "path": "$['CHMIN']"
+                    }
+                  },
+                  {
+                    "source": {
+                      "name": "CHMAX",
+                      "type": "Int32"
+                    },
+                    "sink": {
+                      "path": "$['CHMAX']"
+                    }
+                  },
+                  {
+                    "source": {
+                      "name": "PRP",
+                      "type": "Int32"
+                    },
+                    "sink": {
+                      "path": "$['PRP']"
+                    }
+                  },
+                  {
+                    "source": {
+                      "name": "ERP",
+                      "type": "Int32"
+                    },
+                    "sink": {
+                      "path": "$['ERP']"
+                    }
+                  },
+                  {
+                    "source": {
+                      "name": "VendorId",
+                      "type": "Int32"
+                    },
+                    "sink": {
+                      "path": "$['VendorId']"
+                    }
+                  }
+                ]
+              }
+            },
+            "inputs": [
+              {
+                "referenceName": "DS_CSV_ADLSG2_DemoPrep_NormalizedMachineData",
+                "type": "DatasetReference",
+                "parameters": {}
+              }
+            ],
+            "outputs": [
+              {
+                "referenceName": "DS_CosmosDB_MachineData",
+                "type": "DatasetReference",
+                "parameters": {}
+              }
+            ]
+          }
+        ],
+        "folder": {
+          "name": "Demo-Prep"
+        },
+        "annotations": []
+      },
+      "dependsOn": [
+        "[concat(variables('factoryId'), '/datasets/DS_CSV_ADLSG2_DemoPrep_NormalizedMachineData')]",
+        "[concat(variables('factoryId'), '/datasets/DS_CosmosDB_MachineData')]"
+      ]
+    },
+    {
+      "name": "[concat(variables('factoryName'), '/PL_Curate_ADLSG2_MachineData')]",
+      "type": "Microsoft.DataFactory/factories/pipelines",
+      "apiVersion": "2018-06-01",
+      "properties": {
+        "activities": [
+          {
+            "name": "WDF_ADLSG2_MachineData",
+            "type": "ExecuteWranglingDataflow",
+            "dependsOn": [],
+            "policy": {
+              "timeout": "7.00:00:00",
+              "retry": 0,
+              "retryIntervalInSeconds": 30,
+              "secureOutput": false,
+              "secureInput": false
+            },
+            "userProperties": [],
+            "typeProperties": {
+              "dataflow": {
+                "referenceName": "WDF_ADLSG2_MachineData",
+                "type": "DataFlowReference",
+                "datasetParameters": {
+                  "DS_CSV_ADLSG2_Landing_Vendors": {},
+                  "DS_CSV_ADLSG2_Landing_MachineData": {},
+                  "Sink1": {}
+                }
+              },
+              "staging": {}
+            }
+          }
+        ],
+        "folder": {
+          "name": "Data Preparation"
+        },
+        "annotations": []
+      },
+      "dependsOn": [
+        "[concat(variables('factoryId'), '/dataflows/WDF_ADLSG2_MachineData')]"
+      ]
+    },
+    {
+      "name": "[concat(variables('factoryName'), '/PL_E2E_MachineData')]",
+      "type": "Microsoft.DataFactory/factories/pipelines",
+      "apiVersion": "2018-06-01",
+      "properties": {
+        "activities": [
+          {
+            "name": "Act_Execute_PL_Copy_CosmosDB_To_ADLSG2",
+            "type": "ExecutePipeline",
+            "dependsOn": [],
+            "userProperties": [],
+            "typeProperties": {
+              "pipeline": {
+                "referenceName": "PL_Copy_CosmosDB_To_ADLSG2",
+                "type": "PipelineReference"
+              },
+              "waitOnCompletion": true,
+              "parameters": {}
+            }
+          },
+          {
+            "name": "Act_Execute_PL_Copy_AzureSQL_To_ADLSG2",
+            "type": "ExecutePipeline",
+            "dependsOn": [],
+            "userProperties": [],
+            "typeProperties": {
+              "pipeline": {
+                "referenceName": "PL_Copy_AzureSQL_To_ADLSG2",
+                "type": "PipelineReference"
+              },
+              "waitOnCompletion": true,
+              "parameters": {}
+            }
+          },
+          {
+            "name": "Act_Execute_PL_Curate_ADLSG2_MachineData",
+            "type": "ExecutePipeline",
+            "dependsOn": [
+              {
+                "activity": "Act_Execute_PL_Copy_CosmosDB_To_ADLSG2",
+                "dependencyConditions": [
+                  "Succeeded"
+                ]
+              },
+              {
+                "activity": "Act_Execute_PL_Copy_AzureSQL_To_ADLSG2",
+                "dependencyConditions": [
+                  "Succeeded"
+                ]
+              }
+            ],
+            "userProperties": [],
+            "typeProperties": {
+              "pipeline": {
+                "referenceName": "PL_Curate_ADLSG2_MachineData",
+                "type": "PipelineReference"
+              },
+              "waitOnCompletion": true,
+              "parameters": {}
+            }
+          }
+        ],
+        "annotations": []
+      },
+      "dependsOn": [
+        "[concat(variables('factoryId'), '/pipelines/PL_Copy_CosmosDB_To_ADLSG2')]",
+        "[concat(variables('factoryId'), '/pipelines/PL_Copy_AzureSQL_To_ADLSG2')]",
+        "[concat(variables('factoryId'), '/pipelines/PL_Curate_ADLSG2_MachineData')]"
+      ]
+    },
+    {
+      "name": "[concat(variables('factoryName'), '/PL_Copy_ADLSG2_To_AzureSQL')]",
+      "type": "Microsoft.DataFactory/factories/pipelines",
+      "apiVersion": "2018-06-01",
+      "properties": {
+        "activities": [
+          {
+            "name": "Act_Copy_ADLSG2_To_AzureSQL",
+            "type": "Copy",
+            "dependsOn": [],
+            "policy": {
+              "timeout": "7.00:00:00",
+              "retry": 0,
+              "retryIntervalInSeconds": 30,
+              "secureOutput": false,
+              "secureInput": false
+            },
+            "userProperties": [
+              {
+                "name": "Source",
+                "value": "demo-prep//vendors.csv"
+              },
+              {
+                "name": "Destination",
+                "value": "dbo.Vendors"
+              }
+            ],
+            "typeProperties": {
+              "source": {
+                "type": "DelimitedTextSource",
+                "storeSettings": {
+                  "type": "AzureBlobFSReadSettings",
+                  "recursive": false
+                },
+                "formatSettings": {
+                  "type": "DelimitedTextReadSettings",
+                  "skipLineCount": 0
+                }
+              },
+              "sink": {
+                "type": "AzureSqlSink",
+                "tableOption": "autoCreate"
+              },
+              "enableStaging": false,
+              "translator": {
+                "type": "TabularTranslator",
+                "mappings": [
+                  {
+                    "source": {
+                      "name": "VendorId",
+                      "type": "Int16"
+                    },
+                    "sink": {
+                      "name": "VendorId",
+                      "type": "Int16"
+                    }
+                  },
+                  {
+                    "source": {
+                      "name": "VendorName",
+                      "type": "String"
+                    },
+                    "sink": {
+                      "name": "VendorName",
+                      "type": "String"
+                    }
+                  }
+                ]
+              }
+            },
+            "inputs": [
+              {
+                "referenceName": "DS_CSV_ADLSG2_DemoPrep_Vendors",
+                "type": "DatasetReference",
+                "parameters": {}
+              }
+            ],
+            "outputs": [
+              {
+                "referenceName": "DS_AzureSQL_Dbo_Vendors",
+                "type": "DatasetReference",
+                "parameters": {}
+              }
+            ]
+          }
+        ],
+        "folder": {
+          "name": "Demo-Prep"
+        },
+        "annotations": []
+      },
+      "dependsOn": [
+        "[concat(variables('factoryId'), '/datasets/DS_CSV_ADLSG2_DemoPrep_Vendors')]",
+        "[concat(variables('factoryId'), '/datasets/DS_AzureSQL_Dbo_Vendors')]"
+      ]
+    },
+    {
+      "name": "[concat(variables('factoryName'), '/PL_E2E_Demo_Prep')]",
+      "type": "Microsoft.DataFactory/factories/pipelines",
+      "apiVersion": "2018-06-01",
+      "properties": {
+        "activities": [
+          {
+            "name": "Act_Execute_PL_Copy_ADLSG2_To_CosmosDB",
+            "type": "ExecutePipeline",
+            "dependsOn": [],
+            "userProperties": [],
+            "typeProperties": {
+              "pipeline": {
+                "referenceName": "PL_Copy_ADLSG2_To_CosmosDB",
+                "type": "PipelineReference"
+              },
+              "waitOnCompletion": true,
+              "parameters": {}
+            }
+          },
+          {
+            "name": "Act_Execute_PL_Copy_ADLSG2_To_AzureSQL",
+            "type": "ExecutePipeline",
+            "dependsOn": [],
+            "userProperties": [],
+            "typeProperties": {
+              "pipeline": {
+                "referenceName": "PL_Copy_ADLSG2_To_AzureSQL",
+                "type": "PipelineReference"
+              },
+              "waitOnCompletion": true,
+              "parameters": {}
+            }
+          }
+        ],
+        "folder": {
+          "name": "Demo-Prep"
+        },
+        "annotations": []
+      },
+      "dependsOn": [
+        "[concat(variables('factoryId'), '/pipelines/PL_Copy_ADLSG2_To_CosmosDB')]",
+        "[concat(variables('factoryId'), '/pipelines/PL_Copy_ADLSG2_To_AzureSQL')]"
+      ]
+    },
+    {
+      "name": "[concat(variables('factoryName'), '/DS_AzureSQL_Dbo_Vendors')]",
+      "type": "Microsoft.DataFactory/factories/datasets",
+      "apiVersion": "2018-06-01",
+      "properties": {
+        "linkedServiceName": {
+          "referenceName": "AzureSqlDatabaseServerless",
+          "type": "LinkedServiceReference"
+        },
+        "annotations": [],
+        "type": "AzureSqlTable",
+        "schema": [
+          {
+            "name": "VendorId",
+            "type": "smallint"
+          },
+          {
+            "name": "VendorName",
+            "type": "varchar"
+          }
+        ],
+        "typeProperties": {
+          "schema": "dbo",
+          "table": "Vendors"
+        }
+      },
+      "dependsOn": [
+        "[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabaseServerless')]"
+      ]
+    },
+    {
+      "name": "[concat(variables('factoryName'), '/DS_CosmosDB_MachineData')]",
+      "type": "Microsoft.DataFactory/factories/datasets",
+      "apiVersion": "2018-06-01",
+      "properties": {
+        "linkedServiceName": {
+          "referenceName": "AzureCosmosDBSQL",
+          "type": "LinkedServiceReference"
+        },
+        "annotations": [],
+        "type": "CosmosDbSqlApiCollection",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "ModelName": {
+              "type": "string"
+            },
+            "MYCT": {
+              "type": "integer"
+            },
+            "MMIN": {
+              "type": "integer"
+            },
+            "MMAX": {
+              "type": "integer"
+            },
+            "CACH": {
+              "type": "integer"
+            },
+            "CHMIN": {
+              "type": "integer"
+            },
+            "CHMAX": {
+              "type": "integer"
+            },
+            "PRP": {
+              "type": "integer"
+            },
+            "ERP": {
+              "type": "integer"
+            },
+            "VendorId": {
+              "type": "integer"
+            }
+          }
+        },
+        "typeProperties": {
+          "collectionName": "MachineData"
+        }
+      },
+      "dependsOn": [
+        "[concat(variables('factoryId'), '/linkedServices/AzureCosmosDBSQL')]"
+      ]
+    },
+    {
+      "name": "[concat(variables('factoryName'), '/DS_CSV_ADLSG2_Landing_Vendors')]",
+      "type": "Microsoft.DataFactory/factories/datasets",
+      "apiVersion": "2018-06-01",
+      "properties": {
+        "linkedServiceName": {
+          "referenceName": "AzureDataLakeGen2",
+          "type": "LinkedServiceReference"
+        },
+        "annotations": [],
+        "type": "DelimitedText",
+        "typeProperties": {
+          "location": {
+            "type": "AzureBlobFSLocation",
+            "fileName": "vendors.csv",
+            "fileSystem": "landing"
+          },
+          "columnDelimiter": ",",
+          "escapeChar": "\\",
+          "firstRowAsHeader": true,
+          "quoteChar": "\""
+        },
+        "schema": [
+          {
+            "name": "VendorId",
+            "type": "String"
+          },
+          {
+            "name": "VendorName",
+            "type": "String"
+          }
+        ]
+      },
+      "dependsOn": [
+        "[concat(variables('factoryId'), '/linkedServices/AzureDataLakeGen2')]"
+      ]
+    },
+    {
+      "name": "[concat(variables('factoryName'), '/DS_CSV_ADLSG2_Curated_MachineData')]",
+      "type": "Microsoft.DataFactory/factories/datasets",
+      "apiVersion": "2018-06-01",
+      "properties": {
+        "linkedServiceName": {
+          "referenceName": "AzureDataLakeGen2",
+          "type": "LinkedServiceReference"
+        },
+        "annotations": [],
+        "type": "DelimitedText",
+        "typeProperties": {
+          "location": {
+            "type": "AzureBlobFSLocation",
+            "fileSystem": "curated"
+          },
+          "columnDelimiter": ",",
+          "escapeChar": "\\",
+          "firstRowAsHeader": true,
+          "quoteChar": "\""
+        },
+        "schema": []
+      },
+      "dependsOn": [
+        "[concat(variables('factoryId'), '/linkedServices/AzureDataLakeGen2')]"
+      ]
+    },
+    {
+      "name": "[concat(variables('factoryName'), '/DS_CSV_ADLSG2_Landing_MachineData')]",
+      "type": "Microsoft.DataFactory/factories/datasets",
+      "apiVersion": "2018-06-01",
+      "properties": {
+        "linkedServiceName": {
+          "referenceName": "AzureDataLakeGen2",
+          "type": "LinkedServiceReference"
+        },
+        "annotations": [],
+        "type": "DelimitedText",
+        "typeProperties": {
+          "location": {
+            "type": "AzureBlobFSLocation",
+            "fileName": "machineData.csv",
+            "fileSystem": "landing"
+          },
+          "columnDelimiter": ",",
+          "escapeChar": "\\",
+          "firstRowAsHeader": true,
+          "quoteChar": "\""
+        },
+        "schema": [
+          {
+            "name": "ModelName",
+            "type": "String"
+          },
+          {
+            "name": "MYCT",
+            "type": "String"
+          },
+          {
+            "name": "MMIN",
+            "type": "String"
+          },
+          {
+            "name": "MMAX",
+            "type": "String"
+          },
+          {
+            "name": "CACH",
+            "type": "String"
+          },
+          {
+            "name": "CHMIN",
+            "type": "String"
+          },
+          {
+            "name": "CHMAX",
+            "type": "String"
+          },
+          {
+            "name": "PRP",
+            "type": "String"
+          },
+          {
+            "name": "ERP",
+            "type": "String"
+          },
+          {
+            "name": "VendorId",
+            "type": "String"
+          }
+        ]
+      },
+      "dependsOn": [
+        "[concat(variables('factoryId'), '/linkedServices/AzureDataLakeGen2')]"
+      ]
+    },
+    {
+      "name": "[concat(variables('factoryName'), '/DS_CSV_ADLSG2_DemoPrep_Vendors')]",
+      "type": "Microsoft.DataFactory/factories/datasets",
+      "apiVersion": "2018-06-01",
+      "properties": {
+        "linkedServiceName": {
+          "referenceName": "AzureDataLakeGen2",
+          "type": "LinkedServiceReference"
+        },
+        "folder": {
+          "name": "Demo-Prep"
+        },
+        "annotations": [],
+        "type": "DelimitedText",
+        "typeProperties": {
+          "location": {
+            "type": "AzureBlobFSLocation",
+            "fileName": "vendors.csv",
+            "fileSystem": "demo-prep"
+          },
+          "columnDelimiter": ",",
+          "rowDelimiter": "\n",
+          "escapeChar": "\\",
+          "firstRowAsHeader": true,
+          "quoteChar": "\""
+        },
+        "schema": [
+          {
+            "name": "VendorId",
+            "type": "String"
+          },
+          {
+            "name": "VendorName",
+            "type": "String"
+          }
+        ]
+      },
+      "dependsOn": [
+        "[concat(variables('factoryId'), '/linkedServices/AzureDataLakeGen2')]"
+      ]
+    },
+    {
+      "name": "[concat(variables('factoryName'), '/DS_JSON_ADLSG2_Landing_MachineData')]",
+      "type": "Microsoft.DataFactory/factories/datasets",
+      "apiVersion": "2018-06-01",
+      "properties": {
+        "linkedServiceName": {
+          "referenceName": "AzureDataLakeGen2",
+          "type": "LinkedServiceReference"
+        },
+        "annotations": [],
+        "type": "Json",
+        "typeProperties": {
+          "location": {
+            "type": "AzureBlobFSLocation",
+            "fileName": "machineData.json",
+            "fileSystem": "landing"
+          }
+        },
+        "schema": {
+          "type": "object",
+          "properties": {
+            "ModelName": {
+              "type": "string"
+            },
+            "MYCT": {
+              "type": "integer"
+            },
+            "MMIN": {
+              "type": "integer"
+            },
+            "MMAX": {
+              "type": "integer"
+            },
+            "CACH": {
+              "type": "integer"
+            },
+            "CHMIN": {
+              "type": "integer"
+            },
+            "CHMAX": {
+              "type": "integer"
+            },
+            "PRP": {
+              "type": "integer"
+            },
+            "ERP": {
+              "type": "integer"
+            },
+            "VendorId": {
+              "type": "integer"
+            },
+            "id": {
+              "type": "string"
+            },
+            "_rid": {
+              "type": "string"
+            },
+            "_self": {
+              "type": "string"
+            },
+            "_etag": {
+              "type": "string"
+            },
+            "_attachments": {
+              "type": "string"
+            },
+            "_ts": {
+              "type": "integer"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[concat(variables('factoryId'), '/linkedServices/AzureDataLakeGen2')]"
+      ]
+    },
+    {
+      "name": "[concat(variables('factoryName'), '/DS_CSV_ADLSG2_DemoPrep_NormalizedMachineData')]",
+      "type": "Microsoft.DataFactory/factories/datasets",
+      "apiVersion": "2018-06-01",
+      "properties": {
+        "linkedServiceName": {
+          "referenceName": "AzureDataLakeGen2",
+          "type": "LinkedServiceReference"
+        },
+        "folder": {
+          "name": "Demo-Prep"
+        },
+        "annotations": [],
+        "type": "DelimitedText",
+        "typeProperties": {
+          "location": {
+            "type": "AzureBlobFSLocation",
+            "fileName": "normalizedMachineData.csv",
+            "fileSystem": "demo-prep"
+          },
+          "columnDelimiter": ",",
+          "rowDelimiter": "\n",
+          "escapeChar": "\\",
+          "firstRowAsHeader": true,
+          "quoteChar": "\""
+        },
+        "schema": [
+          {
+            "name": "ModelName",
+            "type": "String"
+          },
+          {
+            "name": "MYCT",
+            "type": "String"
+          },
+          {
+            "name": "MMIN",
+            "type": "String"
+          },
+          {
+            "name": "MMAX",
+            "type": "String"
+          },
+          {
+            "name": "CACH",
+            "type": "String"
+          },
+          {
+            "name": "CHMIN",
+            "type": "String"
+          },
+          {
+            "name": "CHMAX",
+            "type": "String"
+          },
+          {
+            "name": "PRP",
+            "type": "String"
+          },
+          {
+            "name": "ERP",
+            "type": "String"
+          },
+          {
+            "name": "VendorId",
+            "type": "String"
+          }
+        ]
+      },
+      "dependsOn": [
+        "[concat(variables('factoryId'), '/linkedServices/AzureDataLakeGen2')]"
+      ]
+    },
+    {
+      "name": "[concat(variables('factoryName'), '/AzureSqlDatabaseServerless')]",
+      "type": "Microsoft.DataFactory/factories/linkedServices",
+      "apiVersion": "2018-06-01",
+      "properties": {
+        "annotations": [],
+        "type": "AzureSqlDatabase",
+        "typeProperties": {
+          "connectionString": "[parameters('AzureSqlDatabaseServerless_connectionString')]"
+        }
+      },
+      "dependsOn": []
+    },
+    {
+      "name": "[concat(variables('factoryName'), '/AzureDataLakeGen2')]",
+      "type": "Microsoft.DataFactory/factories/linkedServices",
+      "apiVersion": "2018-06-01",
+      "properties": {
+        "annotations": [],
+        "type": "AzureBlobFS",
+        "typeProperties": {
+          "url": "[parameters('AzureDataLakeGen2_properties_typeProperties_url')]",
+          "accountKey": {
+            "type": "SecureString",
+            "value": "[parameters('AzureDataLakeGen2_accountKey')]"
+          }
+        }
+      },
+      "dependsOn": []
+    },
+    {
+      "name": "[concat(variables('factoryName'), '/AzureCosmosDBSQL')]",
+      "type": "Microsoft.DataFactory/factories/linkedServices",
+      "apiVersion": "2018-06-01",
+      "properties": {
+        "annotations": [],
+        "type": "CosmosDb",
+        "typeProperties": {
+          "connectionString": "[parameters('AzureCosmosDBSQL_connectionString')]"
+        }
+      },
+      "dependsOn": []
+    },
+    {
+      "name": "[concat(variables('factoryName'), '/WDF_ADLSG2_MachineData')]",
+      "type": "Microsoft.DataFactory/factories/dataflows",
+      "apiVersion": "2018-06-01",
+      "properties": {
+        "type": "WranglingDataFlow",
+        "typeProperties": {
+          "sources": [
+            {
+              "name": "DS_CSV_ADLSG2_Landing_Vendors",
+              "script": "",
+              "dataset": {
+                "referenceName": "DS_CSV_ADLSG2_Landing_Vendors",
+                "type": "DatasetReference"
+              },
+              "typeProperties": {
+                "readMode": null
+              }
+            },
+            {
+              "name": "DS_CSV_ADLSG2_Landing_MachineData",
+              "script": "",
+              "dataset": {
+                "referenceName": "DS_CSV_ADLSG2_Landing_MachineData",
+                "type": "DatasetReference"
+              },
+              "typeProperties": {
+                "readMode": null
+              }
+            }
+          ],
+          "sinks": [
+            {
+              "name": "Sink1",
+              "dataset": {
+                "referenceName": "DS_CSV_ADLSG2_Curated_MachineData",
+                "type": "DatasetReference"
+              },
+              "script": "sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['machineData.csv'],\n\ttruncate: true,\n\tpartitionBy('hash', 1)) ~> Sink1"
+            }
+          ],
+          "script": "section Section1; shared #\"DS_CSV_ADLSG2_Landing_Vendors\" = let AdfDoc = Web.Contents(\"https://e2emladlsg2.dfs.core.windows.net/landing/vendors.csv?sv=2018-03-28&sig=VRGb%2FmXXj4vUBMUu90li1J6NIpTVK4iaHiGqjkFbkrE%3D&spr=https&se=2019-11-22T19%3A15%3A09Z&srt=sco&ss=bf&sp=rwl\"),Csv = Csv.Document(AdfDoc, [Delimiter = \",\", Encoding = TextEncoding.Utf8, QuoteStyle = QuoteStyle.Csv]), PromotedHeaders = Table.PromoteHeaders(Csv, [PromoteAllScalars = true]) in  PromotedHeaders;shared #\"DS_CSV_ADLSG2_Landing_MachineData\" = let AdfDoc = Web.Contents(\"https://e2emladlsg2.dfs.core.windows.net/landing/machineData.csv?sv=2018-03-28&sig=VRGb%2FmXXj4vUBMUu90li1J6NIpTVK4iaHiGqjkFbkrE%3D&spr=https&se=2019-11-22T19%3A15%3A09Z&srt=sco&ss=bf&sp=rwl\"),Csv = Csv.Document(AdfDoc, [Delimiter = \",\", Encoding = TextEncoding.Utf8, QuoteStyle = QuoteStyle.Csv]), PromotedHeaders = Table.PromoteHeaders(Csv, [PromoteAllScalars = true]) in  PromotedHeaders;\r\nshared UserQuery = let\r\n  Source = DS_CSV_ADLSG2_Landing_MachineData,\r\n  #\"Merged queries\" = Table.NestedJoin(Source, {\"VendorId\"}, DS_CSV_ADLSG2_Landing_Vendors, {\"VendorId\"}, \"DS_CSV_ADLSG2_Landing_Vendors\", JoinKind.Inner),\r\n  #\"Expanded DS_CSV_ADLSG2_Landing_Vendors\" = Table.ExpandTableColumn(#\"Merged queries\", \"DS_CSV_ADLSG2_Landing_Vendors\", {\"VendorName\"}, {\"DS_CSV_ADLSG2_Landing_Vendors.VendorName\"}),\r\n  #\"Renamed columns\" = Table.RenameColumns(#\"Expanded DS_CSV_ADLSG2_Landing_Vendors\", {{\"DS_CSV_ADLSG2_Landing_Vendors.VendorName\", \"VendorName\"}}),\r\n  #\"Removed columns\" = Table.RemoveColumns(#\"Renamed columns\", {\"VendorId\"}),\r\n  #\"Reordered columns\" = Table.ReorderColumns(#\"Removed columns\", {\"VendorName\", \"ModelName\", \"MYCT\", \"MMIN\", \"MMAX\", \"CACH\", \"CHMIN\", \"CHMAX\", \"PRP\", \"ERP\"}),\r\n  #\"Sorted rows\" = Table.Sort(#\"Reordered columns\", {{\"VendorName\", Order.Ascending}})\r\nin\r\n  #\"Sorted rows\";"
+        }
+      },
+      "dependsOn": [
+        "[concat(variables('factoryId'), '/datasets/DS_CSV_ADLSG2_Landing_Vendors')]",
+        "[concat(variables('factoryId'), '/datasets/DS_CSV_ADLSG2_Landing_MachineData')]",
+        "[concat(variables('factoryId'), '/datasets/DS_CSV_ADLSG2_Curated_MachineData')]"
+      ]
+    }
+  ]
+}
