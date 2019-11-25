@@ -21,6 +21,7 @@ This repository contains end-to-end example solution based on the [Computer Hard
 ## Todos
 
 - AML
+- Architecture diagram
 - Automation: build script
 
 ---
