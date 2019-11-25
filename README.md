@@ -17,6 +17,7 @@ This repository contains end-to-end example solution based on the [Computer Hard
 
 - Through ADF portal, execute pipeline "PL_E2E_MachineData" to hydrate Azure Data Lake Gen 2 and curate the raw data into curated zone
 - Through Azure Machine Learning studio [preview], create notebook VMs with unique name and VM size "STANDARD_DS3_V2"
+- Through AML Notebook VM JupyterLab, open a terminal and clone this repository
 
 ## Todos
 
