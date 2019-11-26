@@ -16,12 +16,25 @@ This repository contains end-to-end example solution based on the [Computer Hard
   - Through ADF portal, execute pipeline "PL_E2E_Demo_Prep" to hydrate Azure Cosmos DB and Azure SQL Database
 
 - Through ADF portal, execute pipeline "PL_E2E_MachineData" to hydrate Azure Data Lake Gen 2 and curate the raw data into curated zone
-- Through Azure Machine Learning studio [preview], create notebook VMs with unique name and VM size "STANDARD_DS3_V2"
-- Through AML Notebook VM JupyterLab, open a terminal and clone this repository
+- Through Azure Machine Learning studio [preview], create notebook VMs (NBVM) with unique name and VM size "STANDARD_DS3_V2"
+- Create service principal using the following command and note the output (the output is needed for later AML notebook):
+
+```bash
+az ad sp create-for-rbac \
+-n "{unique-sp-name}" \
+--role 'Storage Blob Data Reader' \
+--scopes /subscriptions/{subscriptions-id}/resourceGroups/{rg-name}/providers/Microsoft.Storage/storageAccounts/{adlsg2-name}
+```
+- Through AML NBVM JupyterLab:
+  - Open a terminal
+  - Clone this repository (Note: `git` is pre-installed on AML NBVM)
+
+- Through AML NBVM Jupyter:
+  - Open and walkthrough `azure-e2e-ml/aml/auto-ml-regression-hardware-performance-explanation-and-featurization.ipynb`
+  - Note: Currently, mini-widget is not support in JupyterLab. Thus, we are using Jupyter for executing the notebook. There is a [GitHub issue](https://github.com/Azure/MachineLearningNotebooks/issues/666) opened to track the issue.
 
 ## Todos
 
-- AML
 - Architecture diagram
 - Automation: build script
 
