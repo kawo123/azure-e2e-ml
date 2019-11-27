@@ -133,13 +133,13 @@ arm_template_output=$(az group deployment create \
 echo $arm_template_output | jq
 info "ARM template deployment finishes"
 
-azure_cosmos_db_conn_str=$(echo $arm_template_output | jq '.azureCosmosDbConnectionString.value' )
+azure_cosmos_db_conn_str=$(echo $arm_template_output | jq -r '.azureCosmosDbConnectionString.value' )
 # echo $azure_cosmos_db_conn_str
-azure_sql_db_conn_str=$(echo $arm_template_output | jq '.azureSqlDatabaseConnectionString.value' )
+azure_sql_db_conn_str=$(echo $arm_template_output | jq -r '.azureSqlDatabaseConnectionString.value' )
 # echo $azure_sql_db_conn_str
-adlsg2_account_key=$(echo $arm_template_output | jq '.azureDataLakeGen2PropertiesUrl.value' )
+adlsg2_account_key=$(echo $arm_template_output | jq -r '.azureDataLakeGen2AccountKey.value' )
 # echo $adlsg2_account_key
-adlsg2_url=$(echo $arm_template_output | jq '.azureDataLakeGen2PropertiesUrl.value' )
+adlsg2_url=$(echo $arm_template_output | jq -r '.azureDataLakeGen2PropertiesUrl.value' )
 # echo $adlsg2_url
 
 info "Validating ADF ARM template '${ADF_TEMPLATE_PATH}' deployment to resource group '${az_aml_rg_name}'"

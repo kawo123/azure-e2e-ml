@@ -365,11 +365,11 @@
     },
     "AzureSqlDatabaseConnectionString": {
       "type": "string",
-      "value": "[concat('Server=tcp:', variables('azureSqlServerName'),'.database.windows.net,1433;Initial Catalog=MachineVendors;Persist Security Info=False;User ID=',parameters('sqlAdministratorLogin'),';Password=',parameters('sqlAdministratorLoginPassword'),';MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;data source=', variables('azureSqlServerName'),'.database.windows.net;')]"
+      "value": "[concat('Server=tcp:', variables('azureSqlServerName'),'.database.windows.net,1433;Initial Catalog=MachineVendors;Persist Security Info=False;User ID=',parameters('sqlAdministratorLogin'),';Password=',parameters('sqlAdministratorLoginPassword'),';MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;Data Source=', variables('azureSqlServerName'),'.database.windows.net;')]"
     },
     "AzureCosmosDbConnectionString": {
       "type": "string",
-      "value": "[concat('AccountEndpoint=https://', variables('cosmosDbAccountName'), '.documents.azure.com:443/;AccountKey=', listKeys(resourceId('Microsoft.DocumentDB/databaseAccounts', variables('cosmosDbAccountName')), providers('Microsoft.DocumentDB', 'databaseAccounts').apiVersions[0]).primaryMasterKey, ';Database=Machine;')]"
+      "value": "[concat('AccountEndpoint=https://', variables('cosmosDbAccountName'), '.documents.azure.com:443/;AccountKey=', listKeys(resourceId('Microsoft.DocumentDB/databaseAccounts', variables('cosmosDbAccountName')), providers('Microsoft.DocumentDB', 'databaseAccounts').apiVersions[0]).primaryMasterKey, ';Database=Machine')]"
     }
   }
 }
