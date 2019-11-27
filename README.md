@@ -14,6 +14,7 @@ This repository contains end-to-end example solution based on the [Computer Hard
 
 ## Pre-requisite
 
+- [Azure Storage Explorer](https://azure.microsoft.com/en-us/features/storage-explorer/)
 - [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest)
 - [Azure CLI extension: ML](https://docs.microsoft.com/en-us/azure/machine-learning/service/reference-azure-machine-learning-cli)
 - [jq](https://stedolan.github.io/jq/download/)
@@ -22,7 +23,7 @@ This repository contains end-to-end example solution based on the [Computer Hard
 
 - Environment preparation
   - Run `AZ_SUBSCRIPTION_ID='{subscription-id}' AZ_BASE_NAME='{unique-base-name}' AZ_REGION='{azure-region}' ./build_environment.sh`to provision the Azure environment
-  - Through [Azure Storage Explorer](https://azure.microsoft.com/en-us/features/storage-explorer/) or [Storage Explorer in Azure Portal](https://azure.microsoft.com/en-us/updates/storage-explorer-preview-now-available-in-azure-portal/), upload data files from `./data/*` to ADLSG2 "demo-prep" container
+  - Through [Azure Storage Explorer](https://azure.microsoft.com/en-us/features/storage-explorer/), upload data files from `./data/*` to ADLSG2 "demo-prep" container
   - Through ADF portal, execute pipeline "PL_E2E_Demo_Prep" to hydrate Azure Cosmos DB and Azure SQL Database
 
 - Through ADF portal, execute pipeline "PL_E2E_MachineData" to hydrate Azure Data Lake Gen 2 and curate the raw data into curated zone
