@@ -2,6 +2,16 @@
 
 This repository contains end-to-end example solution based on the [Computer Hardware dataset](http://archive.ics.uci.edu/ml/datasets/Computer+Hardware) built from Azure Data Factory, Azure Data Lake Gen 2, and Azure Machine Learning Python SDK to ingest data from multiple data sources, build machine learning models, and serve machine learning models as HTTP endpoints.
 
+## Architecture
+
+![Azure End-to-end Machine Learning Deployment Architecture](./doc/architecture.png "Azure End-to-end Machine Learning Deployment Architecture")
+
+1. User has data sources from [Azure SQL Database](https://azure.microsoft.com/en-us/services/sql-database/) and [Azure Cosmos Database](https://azure.microsoft.com/en-us/services/cosmos-db/)
+2. User ingests data from data sources with [Azure Data Factory](https://azure.microsoft.com/en-us/services/data-factory/) to [Azure Data Lake Gen 2](https://docs.microsoft.com/en-us/azure/storage/blobs/data-lake-storage-introduction)
+3. User performs data preparation using [Azure Data Factory Wrangling Data Flow](https://docs.microsoft.com/en-us/azure/data-factory/wrangling-data-flow-overview)
+4. User trains machine learning model using [Azure Machine Learning Service](https://azure.microsoft.com/en-us/services/machine-learning/)
+5. User deploys machine learning model to [Azure Container Instance](https://azure.microsoft.com/en-us/services/container-instances/) using [Azure Machine Learning Python SDK](https://docs.microsoft.com/en-us/python/api/overview/azure/ml/intro?view=azure-ml-py)
+
 ## Pre-requisite
 
 - [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest)
