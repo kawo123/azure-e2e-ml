@@ -99,7 +99,7 @@ fi
 az_aml_rg_name="${AZ_BASE_NAME}-rg"
 
 info "Initiating login to Azure"
-# az login > /dev/null
+az login > /dev/null
 info "Successfully login to Azure"
 
 info "Setting Az CLI subscription context to '${AZ_SUBSCRIPTION_ID}'"
@@ -134,13 +134,13 @@ echo $arm_template_output | jq
 info "ARM template deployment finishes"
 
 azure_cosmos_db_conn_str=$(echo $arm_template_output | jq '.azureCosmosDbConnectionString.value' )
-echo $azure_cosmos_db_conn_str
+# echo $azure_cosmos_db_conn_str
 azure_sql_db_conn_str=$(echo $arm_template_output | jq '.azureSqlDatabaseConnectionString.value' )
-echo $azure_sql_db_conn_str
+# echo $azure_sql_db_conn_str
 adlsg2_account_key=$(echo $arm_template_output | jq '.azureDataLakeGen2PropertiesUrl.value' )
-echo $adlsg2_account_key
+# echo $adlsg2_account_key
 adlsg2_url=$(echo $arm_template_output | jq '.azureDataLakeGen2PropertiesUrl.value' )
-echo $adlsg2_url
+# echo $adlsg2_url
 
 info "Validating ADF ARM template '${ADF_TEMPLATE_PATH}' deployment to resource group '${az_aml_rg_name}'"
 az group deployment validate \
@@ -151,7 +151,7 @@ baseName="${AZ_BASE_NAME}" \
 AzureDataLakeGen2_accountKey="${adlsg2_account_key}" \
 AzureSqlDatabaseServerless_connectionString="${azure_sql_db_conn_str}" \
 AzureCosmosDBSQL_connectionString="${azure_cosmos_db_conn_str}" \
-AzureDataLakeGen2_properties_typeProperties_url="${adlsg2_url}"
+AzureDataLakeGen2_properties_typeProperties_url="${adlsg2_url}" > /dev/null
 
 if [ $? -eq 0 ]; then
   info "ADF ARM template validation passes"

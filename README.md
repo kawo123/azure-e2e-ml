@@ -11,7 +11,7 @@ This repository contains end-to-end example solution based on the [Computer Hard
 ## Getting Started
 
 - Environment preparation
-  - Run `./build_environment.sh`to provision the Azure environment
+  - Run `AZ_SUBSCRIPTION_ID='{subscription-id}' AZ_BASE_NAME='{unique-base-name}' AZ_REGION='{azure-region}' ./build_environment.sh`to provision the Azure environment
   - Through Azure Storage Explorer, copy data files from `./data/*` to ADLSG2 "demo-prep" container
   - Through ADF portal, execute pipeline "PL_E2E_Demo_Prep" to hydrate Azure Cosmos DB and Azure SQL Database
 
@@ -30,7 +30,8 @@ az ad sp create-for-rbac \
   - Clone this repository (Note: `git` is pre-installed on AML NBVM)
 
 - Through AML NBVM Jupyter:
-  - Open and walkthrough `azure-e2e-ml/aml/auto-ml-regression-hardware-performance-explanation-and-featurization.ipynb`
+  - Open and walkthrough `azure-e2e-ml/aml/configuration.ipynb` to configure local environment with AML configurations
+  - Open and walkthrough `azure-e2e-ml/aml/auto-ml-regression-hardware-performance-explanation-and-featurization.ipynb` to build and deploy model
   - Note: Currently, mini-widget is not support in JupyterLab. Thus, we are using Jupyter for executing the notebook. There is a [GitHub issue](https://github.com/Azure/MachineLearningNotebooks/issues/666) opened to track the issue.
 
 ## Todos
