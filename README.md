@@ -24,10 +24,13 @@ This repository contains end-to-end example solution based on the [Computer Hard
 - Environment preparation
   - Run `AZ_SUBSCRIPTION_ID='{subscription-id}' AZ_BASE_NAME='{unique-base-name}' AZ_REGION='{azure-region}' ./build_environment.sh`to provision the Azure environment
   - Through [Azure Storage Explorer](https://azure.microsoft.com/en-us/features/storage-explorer/), upload data files from `./data/*` to ADLSG2 "demo-prep" container
-  - Through ADF portal, execute pipeline "PL_E2E_Demo_Prep" to hydrate Azure Cosmos DB and Azure SQL Database
+  - Through ADF portal, execute pipeline "PL_E2E_Demo_Prep" (under "Demp-Prep" folder) to hydrate Azure Cosmos DB and Azure SQL Database
 
 - Through ADF portal, execute pipeline "PL_E2E_MachineData" to hydrate Azure Data Lake Gen 2 and curate the raw data into curated zone
-- Through Azure Machine Learning studio [preview], create notebook VMs (NBVM) with unique VM name and VM size "STANDARD_DS3_V2"
+- Through [Azure Machine Learning studio [preview]](https://ml.azure.com),
+  - Upgrade AML workspace to Enterprise edition. This is required for the advanced AutoML features which this solution will use.
+  - Create notebook VMs (NBVM) with unique VM name and VM size "STANDARD_DS3_V2"
+  - **Note:** make sure that AML studio is scoped to the appropriate AML workspace that is created by the build automation
 - Create service principal using the following command and note the output (the output is needed later for AML notebook):
 
 ```bash
@@ -36,12 +39,11 @@ az ad sp create-for-rbac \
 --role 'Storage Blob Data Reader' \
 --scopes /subscriptions/{subscriptions-id}/resourceGroups/{rg-name}/providers/Microsoft.Storage/storageAccounts/{adlsg2-name}
 ```
-- Through AML NBVM JupyterLab:
-  - Open a terminal
-  - Clone this repository (Note: `git` is pre-installed on AML NBVM)
 
 - Through AML NBVM Jupyter:
+  - Create a new terminal and clone this repository (Note: `git` is pre-installed on AML NBVM)
   - Open and walkthrough `azure-e2e-ml/aml/configuration.ipynb` to configure local environment with AML configurations
+    - **Note:** you have to replace the default values of `SUBSCRIPTION_ID`, `RESOURCE_GROUP`, `WORKSPACE_NAME`, `WORKSPACE_REGION` with appropriate values in this notebook
   - Open and walkthrough `azure-e2e-ml/aml/auto-ml-regression-hardware-performance-explanation-and-featurization.ipynb` to build and deploy model
   - Note: Currently, mini-widget is not support in JupyterLab. Thus, we are using Jupyter for executing the notebook. There is a [GitHub issue](https://github.com/Azure/MachineLearningNotebooks/issues/666) opened to track the issue.
 
